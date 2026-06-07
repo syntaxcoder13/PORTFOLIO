@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import type { ReactNode, ElementType } from 'react';
+import type { ReactNode } from 'react';
 
 interface FadeInProps {
   children: ReactNode;
@@ -7,10 +7,20 @@ interface FadeInProps {
   duration?: number;
   x?: number;
   y?: number;
-  as?: ElementType;
+  as?: string;
   className?: string;
   style?: React.CSSProperties;
 }
+
+// Cache component references to prevent React from unmounting/remounting on every parent render
+const componentCache: Record<string, any> = {};
+
+const getMotionComponent = (elementType: string) => {
+  if (!componentCache[elementType]) {
+    componentCache[elementType] = motion.create(elementType as any);
+  }
+  return componentCache[elementType];
+};
 
 const FadeIn = ({
   children,
@@ -22,8 +32,7 @@ const FadeIn = ({
   className,
   style,
 }: FadeInProps) => {
-  // motion.create() supports dynamic element types in framer-motion v12
-  const MotionComponent = motion.create(as);
+  const MotionComponent = getMotionComponent(as);
 
   return (
     <MotionComponent

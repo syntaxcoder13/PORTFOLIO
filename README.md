@@ -1,6 +1,6 @@
-# Harsh Goyal — Developer & Designer Portfolio
+# Arnay Tiwari — Developer & Designer Portfolio
 
-A dark-themed personal portfolio for **Harsh Goyal** — Computer Science graduate from NSUT, currently a Content R&D Trainee at PhysicsWallah. Focused on UI/UX, front-end development, and GenAI integration.
+A dark-themed personal portfolio for **Arnay Tiwari** — Computer Science graduate from NSUT, currently a Content R&D Trainee at PhysicsWallah. Focused on UI/UX, front-end development, and GenAI integration.
 
 Built with **React + TypeScript + Vite + Tailwind CSS + Framer Motion**. Designed for one-click deployment on **Vercel**.
 
@@ -77,4 +77,4 @@ src/
 
 ## Credits
 
-Designed & built by **Harsh Goyal** · [LinkedIn](https://www.linkedin.com/in/harsh-goyal-7900b2256/) · [GitHub](https://github.com/harshgoyal27)
+Designed & built by **Arnay Tiwari** · [LinkedIn](https://www.linkedin.com/in/arnay-tiwari/) · [GitHub](https://github.com/syntaxcoder13)

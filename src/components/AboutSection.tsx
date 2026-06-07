@@ -88,59 +88,17 @@ const AboutSection = () => {
         </FadeIn>
 
           <div className="flex flex-col items-center gap-12 sm:gap-16 md:gap-20">
-                    <AnimatedText
-                      text={ABOUT_TEXT}
-                      className="font-medium leading-relaxed text-[#D7E2EA] max-w-[560px]"
-                      style={{ fontSize: 'clamp(1rem, 2vw, 1.35rem)' }}
-                    />
+            <AnimatedText
+              text={ABOUT_TEXT}
+              className="font-medium leading-relaxed text-[#D7E2EA] max-w-[560px]"
+              style={{ fontSize: 'clamp(1rem, 2vw, 1.35rem)' }}
+            />
 
-                    {/* Skills */}
-                    <FadeIn delay={0.15} className="w-full max-w-3xl">
-                      <div className="flex flex-col gap-5 sm:gap-6">
-                        {[
-                          {
-                            label: 'Languages',
-                            items: ['Python', 'JavaScript', 'HTML', 'CSS', 'SQL'],
-                          },
-                          {
-                            label: 'Frameworks & Libraries',
-                            items: ['React', 'Tailwind', 'Pandas', 'NumPy', 'Scikit-learn', 'NLTK'],
-                          },
-                          {
-                            label: 'Tools & Platforms',
-                            items: ['Figma', 'Vercel', 'Git', 'GitHub', 'Power BI', 'Canva', 'Excel'],
-                          },
-                          {
-                            label: 'AI & GenAI',
-                            items: ['Gemini', 'Claude', 'OpenAI', 'Prompt engineering'],
-                          },
-                        ].map((group) => (
-                          <div
-                            key={group.label}
-                            className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-5"
-                          >
-                            <span className="text-xs uppercase tracking-widest text-[#D7E2EA]/40 sm:w-44 sm:shrink-0 sm:text-right">
-                              {group.label}
-                            </span>
-                            <div className="flex flex-wrap gap-2">
-                              {group.items.map((item) => (
-                                <span
-                                  key={item}
-                                  className="rounded-full border border-[#D7E2EA]/15 bg-[#D7E2EA]/[0.03] px-3 py-1 text-sm text-[#D7E2EA]/80 hover:border-[#D7E2EA]/40 hover:text-[#D7E2EA] transition-colors"
-                                >
-                                  {item}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </FadeIn>
-
-                    <FadeIn delay={0.25}>
-                      <ContactButton />
-                    </FadeIn>
-                  </div>      </div>
+            <FadeIn delay={0.25}>
+              <ContactButton />
+            </FadeIn>
+          </div>
+        </div>
     </section>
   );
 };

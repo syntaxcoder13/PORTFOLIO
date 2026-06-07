@@ -3,10 +3,11 @@ import { useEffect } from 'react';
 interface VideoModalProps {
   open: boolean;
   onClose: () => void;
-  youtubeId: string;
+  youtubeId?: string;
+  videoSrc?: string;
 }
 
-const VideoModal = ({ open, onClose, youtubeId }: VideoModalProps) => {
+const VideoModal = ({ open, onClose, youtubeId, videoSrc }: VideoModalProps) => {
   // Close on Escape
   useEffect(() => {
     if (!open) return;
@@ -33,7 +34,7 @@ const VideoModal = ({ open, onClose, youtubeId }: VideoModalProps) => {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Introduction video"
+      aria-label="Video player"
       onClick={onClose}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 sm:p-8"
       style={{ animation: 'fadeIn 0.2s ease-out' }}
@@ -53,13 +54,23 @@ const VideoModal = ({ open, onClose, youtubeId }: VideoModalProps) => {
 
         {/* 16:9 video container */}
         <div className="relative w-full overflow-hidden rounded-2xl bg-black shadow-2xl" style={{ paddingBottom: '56.25%' }}>
-          <iframe
-            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`}
-            title="Introduction video"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full border-0"
-          />
+          {videoSrc ? (
+            <video
+              src={videoSrc}
+              autoPlay
+              controls
+              playsInline
+              className="absolute inset-0 h-full w-full border-0 object-contain"
+            />
+          ) : (
+            <iframe
+              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+              title="Video Player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full border-0"
+            />
+          )}
         </div>
       </div>
 

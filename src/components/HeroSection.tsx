@@ -144,7 +144,7 @@ const HeroSection = () => {
                 className="font-black uppercase leading-[0.88] tracking-tight text-white"
                 style={{ fontSize: 'clamp(3rem, 12vw, 10.5rem)' }}
               >
-                Harsh<br />Goyal
+                Arnay<br />Tiwari
               </h1>
             </FadeIn>
 
