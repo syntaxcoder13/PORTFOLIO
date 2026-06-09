@@ -91,7 +91,7 @@ const SkillCard = ({ group, index }: { group: SkillGroup; index: number }) => {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className="group relative flex flex-col rounded-[24px] border border-[#D7E2EA]/5 bg-[#121212]/15 backdrop-blur-xl p-8 sm:p-10 transition-all duration-500 overflow-hidden"
+      className="group relative flex flex-col rounded-xl border border-[#D7E2EA]/5 bg-[#121212]/15 backdrop-blur-xl p-8 sm:p-10 transition-all duration-500 overflow-hidden"
     >
       {/* Spotlight Background overlay */}
       <motion.div
@@ -101,7 +101,7 @@ const SkillCard = ({ group, index }: { group: SkillGroup; index: number }) => {
 
       {/* Spotlight Border overlay */}
       <motion.div
-        className="pointer-events-none absolute inset-0 rounded-[24px] border border-transparent transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 rounded-xl border border-transparent transition-opacity duration-300 opacity-0 group-hover:opacity-100"
         style={{
           borderImageSource: borderSpotlight,
           borderImageSlice: 1,
@@ -119,7 +119,7 @@ const SkillCard = ({ group, index }: { group: SkillGroup; index: number }) => {
         {/* Header */}
         <div className="flex items-center gap-5 mb-8">
           <div
-            className="flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-500 group-hover:scale-105"
+            className="flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-500 group-hover:scale-105"
             style={{
               background: `rgba(${group.rgbColor}, 0.06)`,
               border: `1px solid rgba(${group.rgbColor}, 0.15)`,
@@ -185,7 +185,7 @@ const SkillsSection = () => {
           </FadeIn>
           <FadeIn delay={0.12} y={20}>
             <p className="font-light uppercase tracking-[0.25em] text-[#D7E2EA]/50 text-xs sm:text-sm">
-              Languages, Frameworks, and Tools in My Technical Arsenal
+              Languages, Frameworks, and Tools I Work With
             </p>
           </FadeIn>
         </div>

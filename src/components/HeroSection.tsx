@@ -1,209 +1,245 @@
-import { useState, useEffect, useRef } from 'react';
-import FadeIn from './FadeIn';
+import { useEffect, useRef } from 'react';
+import { ArrowUpRight } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript } from 'react-icons/si';
+import { SiPython, SiPandas, SiMysql } from 'react-icons/si';
 
-const NAV_LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Contact', href: '#contact' },
-];
+gsap.registerPlugin(ScrollTrigger);
 
 const HeroSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
-  const [showSoundHint, setShowSoundHint] = useState(true);
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
+  const greetingRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const techTrayRef = useRef<HTMLDivElement>(null);
+  const portraitRef = useRef<HTMLDivElement>(null);
+  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
 
-  // Auto-hide "Tap for sound" hint after 5 seconds
   useEffect(() => {
-    const t = setTimeout(() => setShowSoundHint(false), 5000);
-    return () => clearTimeout(t);
-  }, []);
+    // GSAP entry timeline
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-  // Auto-mute video when scrolling past hero
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) {
-          const v = videoRef.current;
-          if (v && !v.muted) {
-            v.muted = true;
-            setMuted(true);
-          }
-        }
-      },
-      { threshold: 0, rootMargin: '-50% 0px 0px 0px' }
+    // 1. Left column elements: Staggered reveal
+    tl.fromTo([greetingRef.current, titleRef.current, descRef.current, techTrayRef.current],
+      { y: 40, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.9, stagger: 0.15 }
     );
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
 
-  // Snap-scroll: one wheel tick / keypress while at top → jump to About
-  useEffect(() => {
-    let fired = false;
+    // 2. Right portrait container: Slide in and subtle scale back-bounce
+    tl.fromTo(portraitRef.current,
+      { x: 50, scale: 0.96, opacity: 0 },
+      { x: 0, scale: 1, opacity: 1, duration: 1.1, ease: 'back.out(1.1)' },
+      '-=0.6'
+    );
 
-      const goToAbout = () => {
-        if (fired) return;
-        fired = true;
-        const about = document.getElementById('about');
-        if (about) about.scrollIntoView({ behavior: 'auto', block: 'start' });
-      };
+    // 3. Scroll indicator: Fade up
+    tl.fromTo(scrollIndicatorRef.current,
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6 },
+      '-=0.4'
+    );
 
-    const onWheel = (e: WheelEvent) => {
-      if (fired) return;
-      if (e.deltaY <= 0) return;
-      if (window.scrollY > 50) return;
-      e.preventDefault();
-      goToAbout();
-    };
+    // 5. Scroll-linked transition (Hero pinning)
+    const pinTrigger = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: 'top top',
+      end: 'bottom top',
+      pin: true,
+      pinSpacing: false,
+      id: 'hero-pin',
+    });
 
-    const onKey = (e: KeyboardEvent) => {
-      if (fired) return;
-      if (window.scrollY > 50) return;
-      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
-        e.preventDefault();
-        goToAbout();
-      }
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: false });
-    window.addEventListener('keydown', onKey);
     return () => {
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('keydown', onKey);
+      pinTrigger.kill();
     };
   }, []);
-
-  const toggleMute = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = !v.muted;
-    setMuted(v.muted);
-    setShowSoundHint(false);
-  };
 
   return (
-    <section ref={sectionRef} className="relative h-screen w-full overflow-hidden bg-black">
-      {/* Video background */}
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        className="absolute inset-0 h-full w-full object-cover"
+    <section
+      ref={sectionRef}
+      id="hero"
+      className="relative min-h-screen w-full overflow-hidden bg-[#0C0C0C] flex flex-col justify-between"
+    >
+      {/* Wrapper for scroll-linked animations */}
+      <div
+        ref={contentWrapperRef}
+        className="flex-1 flex flex-col justify-between w-full relative origin-center"
       >
-        <source src="/intro.mp4" type="video/mp4" />
-      </video>
+        {/* Background Dot grid pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
 
-      {/* Cinematic gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/35 to-black/40" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
+        {/* Spacer to preserve layout structure since header is fixed */}
+        <div className="h-[44px] md:h-[52px] w-full shrink-0 pointer-events-none" />
 
-      {/* Content layer */}
-      <div className="relative z-10 flex h-full flex-col">
-        {/* Top bar */}
-        <FadeIn delay={0} y={-20} className="relative">
-          <div className="flex items-center justify-between px-6 md:px-10 pt-6 md:pt-8">
-            <ul className="flex items-center gap-5 sm:gap-8 md:gap-12">
-              {NAV_LINKS.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-xs sm:text-sm font-medium uppercase tracking-[0.2em] text-white/80 transition hover:text-white"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+        {/* Main split-grid layout content */}
+        <div className="relative z-10 flex-1 flex items-center w-full max-w-7xl mx-auto px-6 md:px-10 py-12 lg:py-0">
+          <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
-            <a
-              href="#contact"
-              className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 sm:px-5 sm:py-2.5 text-[10px] sm:text-xs font-medium uppercase tracking-[0.2em] text-white backdrop-blur-md transition hover:bg-white/20 hover:scale-[1.03]"
-            >
-              Email me
-            </a>
-          </div>
-        </FadeIn>
-
-        {/* Middle-left: PORTFOLIO + Name + Subtitle */}
-        <div className="flex flex-1 items-center">
-          <div className="w-full max-w-7xl px-6 md:px-10">
-            <FadeIn delay={0.3} y={20}>
-              <p className="mb-4 text-[10px] sm:text-xs font-medium uppercase tracking-[0.35em] text-white/60">
-                Portfolio · 2026
-              </p>
-            </FadeIn>
-
-            <FadeIn delay={0.5} y={40}>
-              <h1
-                className="font-black uppercase leading-[0.88] tracking-tight text-white"
-                style={{ fontSize: 'clamp(3rem, 12vw, 10.5rem)' }}
+            {/* Left Column: Typography, Bio & CTAs */}
+            <div className="lg:col-span-7 flex flex-col justify-center gap-6 text-left">
+              <div
+                ref={greetingRef}
+                className="flex items-center gap-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-[#D7E2EA]/60 select-none opacity-0"
               >
-                Arnay<br />Tiwari
-              </h1>
-            </FadeIn>
+                <span className="h-2 w-2 rounded-full bg-[#a3e635] shadow-[0_0_8px_#a3e635]" />
+                <span>HI I'M ARNAY TIWARI 👋</span>
+              </div>
 
-            <FadeIn delay={0.85} y={20}>
-              <p className="mt-5 md:mt-7 text-[10px] sm:text-xs md:text-sm font-medium uppercase tracking-[0.3em] text-white/75">
-                Developer · Designer · GenAI Integration
+              <h1
+                ref={titleRef}
+                style={{ fontFamily: '"Bebas Neue", sans-serif' }}
+                className="text-3xl sm:text-6xl md:text-7xl lg:text-8xl tracking-wider text-white leading-[1.05] opacity-0"
+              >
+                <span className="whitespace-normal sm:whitespace-nowrap">Frontend <span className="text-[#a3e635]">Developer</span></span>
+                <br />
+                <span className="whitespace-normal sm:whitespace-nowrap">& <span className="text-[#a3e635]">Data Analyst</span></span>
+              </h1>
+
+              <p
+                ref={descRef}
+                className="text-sm sm:text-base md:text-lg font-light text-[#D7E2EA]/65 max-w-xl leading-relaxed opacity-0"
+              >
+                I build modern web experiences and turn complex data into clear, actionable insights.
               </p>
-            </FadeIn>
+
+              {/* Tech Stack Tray */}
+              <div
+                ref={techTrayRef}
+                className="mt-6 flex flex-col gap-5 opacity-0 select-none"
+              >
+                {/* Frontend Row */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-[#D7E2EA]/40 font-bold">Frontend Stack</span>
+                  <div className="flex flex-wrap gap-3">
+
+                    {/* React */}
+                    <a href="https://react.dev" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#0f2430] border border-[#1b3d52] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <SiReact size={22} color="#61dafb" />
+                    </a>
+
+                    {/* Next.js */}
+                    <a href="https://nextjs.org" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#141414] border border-[#292929] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <SiNextdotjs size={22} color="#ffffff" />
+                    </a>
+
+                    {/* TypeScript */}
+                    <a href="https://www.typescriptlang.org" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#112240] border border-[#1d3557] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <SiTypescript size={22} color="#3178c6" />
+                    </a>
+
+                    {/* Tailwind CSS */}
+                    <a href="https://tailwindcss.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#0f2d3a] border border-[#1a4a5e] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <SiTailwindcss size={22} color="#38bdf8" />
+                    </a>
+
+                    {/* JavaScript */}
+                    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#f7df1e] border border-[#d4be10] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <SiJavascript size={22} color="#000000" />
+                    </a>
+
+                  </div>
+                </div>
+
+                {/* Data Analyst Row */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-[#D7E2EA]/40 font-bold">Data Analyst Stack</span>
+                  <div className="flex flex-wrap gap-3">
+
+                    {/* Python */}
+                    <a href="https://www.python.org" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#1c2d3d] border border-[#2c4b63] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <SiPython size={22} color="#3776ab" />
+                    </a>
+
+                    {/* Power BI */}
+                    <a href="https://powerbi.microsoft.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#1a1400] border border-[#3d3000] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                        <rect x="3" y="14" width="4" height="7" rx="1" fill="#f2c811" opacity="0.5" />
+                        <rect x="8.5" y="9" width="4" height="12" rx="1" fill="#f2c811" opacity="0.75" />
+                        <rect x="14" y="4" width="4" height="17" rx="1" fill="#f2c811" />
+                        <rect x="19" y="3" width="2" height="18" rx="0.5" fill="#f2c811" opacity="0.3" />
+                      </svg>
+                    </a>
+
+                    {/* Pandas */}
+                    <a href="https://pandas.pydata.org" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#130c24] border border-[#2a1950] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <SiPandas size={22} color="#150458" style={{ filter: 'brightness(2)' }} />
+                    </a>
+
+                    {/* Tableau */}
+                    <a href="https://www.tableau.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#1a1c2a] border border-[#2e3350] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                        <rect x="10.5" y="2" width="3" height="20" fill="#5b9bd5" rx="0.5" />
+                        <rect x="2" y="10.5" width="20" height="3" fill="#5b9bd5" rx="0.5" />
+                        <rect x="7" y="7" width="3" height="10" fill="#e97627" rx="0.5" />
+                        <rect x="14" y="7" width="3" height="10" fill="#e97627" rx="0.5" />
+                        <rect x="7" y="7" width="10" height="3" fill="#e97627" rx="0.5" />
+                        <rect x="7" y="14" width="10" height="3" fill="#e97627" rx="0.5" />
+                        <rect x="10.5" y="10.5" width="3" height="3" fill="#ffffff" rx="0.3" />
+                      </svg>
+                    </a>
+
+                    {/* SQL */}
+                    <a href="https://www.mysql.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#0d1f2d] border border-[#1a3a52] hover:scale-110 transition-all duration-300 shadow-sm cursor-pointer">
+                      <SiMysql size={26} color="#00758f" />
+                    </a>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Portrait Image */}
+            <div className="lg:col-span-5 relative flex items-center justify-center w-full h-full min-h-[420px] lg:min-h-0">
+
+              {/* Background Dot grid matrix behind portrait */}
+              <div className="absolute top-0 right-16 -z-10 opacity-30 select-none">
+                <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+                  <pattern id="dot-grid-pattern" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="1.5" fill="#ffffff" fillOpacity="0.25" />
+                  </pattern>
+                  <rect width="120" height="120" fill="url(#dot-grid-pattern)" />
+                </svg>
+              </div>
+
+              {/* Plain wrapper without card styling to let image float */}
+              <div
+                ref={portraitRef}
+                className="relative w-full max-w-[480px] sm:max-w-[520px] lg:max-w-[560px] aspect-[4/5] group/portrait opacity-0"
+              >
+                <img
+                  src="/arnay.png"
+                  alt="Arnay Tiwari"
+                  className="relative z-10 w-full h-full object-cover opacity-85 select-none"
+                  draggable={false}
+                  style={{
+                    maskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)'
+                  }}
+                />
+              </div>
+
+            </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="flex items-end justify-between px-6 md:px-10 pb-7 sm:pb-10 md:pb-12">
-          {/* Scroll indicator */}
-          <FadeIn delay={1.1} y={20}>
-            <a href="#about" aria-label="Scroll to next section" className="group flex flex-col items-center gap-3">
-              <span className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.35em] text-white/70 transition group-hover:text-white">
-                Scroll
-              </span>
-              <div className="relative h-12 w-px overflow-hidden bg-white/20">
-                <span
-                  className="absolute inset-x-0 top-0 h-1/2 w-full bg-white"
-                  style={{ animation: 'scrollLine 1.8s ease-in-out infinite' }}
-                />
-              </div>
-            </a>
-          </FadeIn>
-
-          {/* Mute toggle + Sound hint */}
-          <FadeIn delay={1.1} y={20}>
-            <div className="flex items-center gap-3">
-              {showSoundHint && (
-                <span
-                  className="hidden sm:inline text-[10px] font-medium uppercase tracking-[0.25em] text-white/80"
-                  style={{ animation: 'pulseFade 2s ease-in-out infinite' }}
-                >
-                  Tap for sound
-                </span>
-              )}
-              <button
-                onClick={toggleMute}
-                aria-label={muted ? 'Unmute video' : 'Mute video'}
-                className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 hover:scale-110"
-              >
-                {muted ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <line x1="23" y1="9" x2="17" y2="15" />
-                    <line x1="17" y1="9" x2="23" y2="15" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                  </svg>
-                )}
-              </button>
+        {/* Bottom bar: Scroll Indicator */}
+        <div
+          ref={scrollIndicatorRef}
+          className="absolute bottom-6 left-6 md:left-10 z-20 opacity-0"
+        >
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-[8px] uppercase tracking-[0.3em] text-white/30 [writing-mode:vertical-lr] select-none pb-2">
+              Scroll to explore
+            </span>
+            <div className="relative h-10 w-px overflow-hidden bg-white/20">
+              <span
+                className="absolute inset-x-0 top-0 h-1/2 w-full bg-white"
+                style={{ animation: 'scrollLine 1.8s ease-in-out infinite' }}
+              />
             </div>
-          </FadeIn>
+          </div>
         </div>
       </div>
 
@@ -211,10 +247,6 @@ const HeroSection = () => {
         @keyframes scrollLine {
           0% { transform: translateY(-100%); }
           100% { transform: translateY(200%); }
-        }
-        @keyframes pulseFade {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 1; }
         }
       `}</style>
     </section>

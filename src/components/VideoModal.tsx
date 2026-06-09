@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface VideoModalProps {
   open: boolean;
@@ -18,19 +19,31 @@ const VideoModal = ({ open, onClose, youtubeId, videoSrc }: VideoModalProps) => 
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  // Lock body scroll while open
+  // Lock body scroll / pause Lenis while open
   useEffect(() => {
     if (!open) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+
+    const lenis = (window as any).lenis;
+    const originalOverflow = document.body.style.overflow;
+
+    if (lenis) {
+      lenis.stop();
+    } else {
+      document.body.style.overflow = 'hidden';
+    }
+
     return () => {
-      document.body.style.overflow = original;
+      if (lenis) {
+        lenis.start();
+      } else {
+        document.body.style.overflow = originalOverflow;
+      }
     };
   }, [open]);
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -80,7 +93,8 @@ const VideoModal = ({ open, onClose, youtubeId, videoSrc }: VideoModalProps) => 
           to { opacity: 1; }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 };
 

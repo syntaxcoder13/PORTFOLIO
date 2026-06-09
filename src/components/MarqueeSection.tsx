@@ -45,7 +45,7 @@ const Row = ({ images, offset, direction }: RowProps) => {
       {tripled(images).map((src, i) => (
         <div
           key={i}
-          className="shrink-0 overflow-hidden rounded-2xl"
+          className="shrink-0 overflow-hidden rounded-xl"
           style={{ width: 420, height: 270 }}
         >
           <img

@@ -17,15 +17,31 @@ body,
   font-family: 'Kanit', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100%;
 }
 
 body {
   min-height: 100vh;
   color: #d7e2ea;
   overflow-x: hidden;
+  /* Lenis requires this */
+  overscroll-behavior: none;
+}
+
+/* Hardware-accelerated transforms for all animated elements */
+section,
+[class*="transition-"],
+[class*="hover:scale"] {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .hero-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.05em;
   background: linear-gradient(180deg, #646973 0%, #bbccd7 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -51,4 +67,72 @@ body {
 img {
   -webkit-user-drag: none;
   user-select: none;
+}
+
+/* Premium Shine/Splash Light Sweep Effect */
+.btn-shine {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-shine:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 0 12px rgba(215, 226, 234, 0.1);
+  border-color: rgba(215, 226, 234, 0.2) !important;
+}
+
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.btn-shine:hover::after {
+  left: 150%;
+}
+
+/* Purple themed splash light */
+.btn-shine-purple {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-shine-purple:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+  border-color: rgba(168, 85, 247, 0.25) !important;
+}
+
+.btn-shine-purple::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.btn-shine-purple:hover::after {
+  left: 150%;
 }
