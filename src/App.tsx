@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -8,10 +8,13 @@ import AboutSection from './components/sections/AboutSection';
 import ProjectsSection from './components/sections/ProjectsSection';
 import AchievementsSection from './components/sections/AchievementsSection';
 import ContactSection from './components/sections/ContactSection';
+import Preloader from './components/ui/Preloader';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const App = () => {
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     // Lenis smooth scroll
     const lenis = new Lenis({
@@ -23,6 +26,7 @@ const App = () => {
     });
 
     (window as any).lenis = lenis;
+    lenis.stop(); // Start stopped during loading screen
 
     // Keep GSAP ScrollTrigger in sync with Lenis
     lenis.on('scroll', ScrollTrigger.update);
@@ -36,18 +40,32 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const lenis = (window as any).lenis;
+    if (lenis) {
+      if (loading) {
+        lenis.stop();
+      } else {
+        lenis.start();
+      }
+    }
+  }, [loading]);
+
   return (
-    <main
-      className="relative w-full"
-      style={{ overflowX: 'clip', background: '#0C0C0C' }}
-    >
-      <Navbar />
-      <HeroSection />
-      <AboutSection />
-      <ProjectsSection />
-      <AchievementsSection />
-      <ContactSection />
-    </main>
+    <>
+      {loading && <Preloader onComplete={() => setLoading(false)} />}
+      <main
+        className="relative w-full"
+        style={{ overflowX: 'clip', background: '#0C0C0C' }}
+      >
+        <Navbar />
+        <HeroSection />
+        <AboutSection />
+        <ProjectsSection />
+        <AchievementsSection />
+        <ContactSection />
+      </main>
+    </>
   );
 };
 
