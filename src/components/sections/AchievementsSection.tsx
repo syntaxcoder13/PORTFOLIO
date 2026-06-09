@@ -307,7 +307,7 @@ const AchievementsSection = () => {
     <section
       ref={sectionRef}
       id="achievements"
-      className="relative z-30 w-full rounded-t-2xl sm:rounded-t-3xl bg-white text-neutral-900 px-6 sm:px-12 md:px-20 py-24 sm:py-32 overflow-hidden border-t border-neutral-200 shadow-[0_-25px_60px_rgba(0,0,0,0.05)] animate-gpu"
+      className="relative z-30 w-full rounded-t-2xl sm:rounded-t-3xl bg-[#E5EEE4] text-neutral-900 px-6 sm:px-12 md:px-20 py-24 sm:py-32 overflow-hidden border-t border-neutral-200 shadow-[0_-25px_60px_rgba(0,0,0,0.05)] animate-gpu"
     >
       {/* Background dot grid */}
       <div className="absolute inset-0 bg-[radial-gradient(#00000008_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />

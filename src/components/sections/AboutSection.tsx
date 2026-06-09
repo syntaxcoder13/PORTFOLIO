@@ -99,7 +99,7 @@ const AboutSection = () => {
     <section
       ref={sectionRef}
       id="about"
-      className="relative z-20 w-full bg-[#f4f3ef] text-[#1c1c1c] px-6 sm:px-12 md:px-20 py-24 sm:py-32 overflow-hidden border-t border-black/10 shadow-[0_-25px_60px_rgba(0,0,0,0.3)]"
+      className="relative z-20 w-full bg-[#E5EEE4] text-[#1c1c1c] px-6 sm:px-12 md:px-20 py-24 sm:py-32 overflow-hidden border-t border-black/10 shadow-[0_-25px_60px_rgba(0,0,0,0.3)]"
     >
       <div 
         ref={contentWrapperRef} 

@@ -72,14 +72,14 @@ const AllProjectsOverlay = ({ open, onClose, onViewProjectDetails }: AllProjects
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 40 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed inset-0 z-[90] h-screen w-screen overflow-y-auto bg-[#F4F3EF] text-[#1c1c1c] font-sans scroll-smooth"
+        className="fixed inset-0 z-[90] h-screen w-screen overflow-y-auto bg-[#E5EEE4] text-[#1c1c1c] font-sans scroll-smooth"
       >
         {/* Ambient Glows */}
         <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-[#84cc16]/3 blur-[150px] pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] rounded-full bg-blue-500/3 blur-[180px] pointer-events-none" />
 
         {/* Header Bar */}
-        <header className="sticky top-0 z-[100] bg-[#F4F3EF]/85 backdrop-blur-md border-b border-black/[0.06] py-4 px-6 sm:px-12 md:px-20 flex items-center justify-between">
+        <header className="sticky top-0 z-[100] bg-[#E5EEE4]/85 backdrop-blur-md border-b border-black/[0.06] py-4 px-6 sm:px-12 md:px-20 flex items-center justify-between">
           <button
             onClick={onClose}
             className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-700 hover:text-[#84cc16] transition-colors duration-300"
