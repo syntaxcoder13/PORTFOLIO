@@ -2,12 +2,12 @@ import { useEffect } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
-import AboutSection from './components/AboutSection';
-import ProjectsSection from './components/ProjectsSection';
-import AchievementsSection from './components/AchievementsSection';
-import ContactSection from './components/ContactSection';
+import Navbar from './components/layout/Navbar';
+import HeroSection from './components/sections/HeroSection';
+import AboutSection from './components/sections/AboutSection';
+import ProjectsSection from './components/sections/ProjectsSection';
+import AchievementsSection from './components/sections/AchievementsSection';
+import ContactSection from './components/sections/ContactSection';
 
 gsap.registerPlugin(ScrollTrigger);
 
