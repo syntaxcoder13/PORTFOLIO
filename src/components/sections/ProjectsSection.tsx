@@ -70,12 +70,7 @@ const ProjectsSection = () => {
   const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
   const [isAllProjectsOpen, setIsAllProjectsOpen] = useState(false);
 
-  // Listen for Navbar "Projects" click event
-  useEffect(() => {
-    const handleOpenAll = () => setIsAllProjectsOpen(true);
-    window.addEventListener('open-all-projects', handleOpenAll);
-    return () => window.removeEventListener('open-all-projects', handleOpenAll);
-  }, []);
+
 
   // GSAP scroll entry animations
   useEffect(() => {

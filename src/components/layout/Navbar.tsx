@@ -117,14 +117,7 @@ const Navbar = () => {
               <li key={link.label}>
                 <a
                   href={link.href}
-                  onClick={(e) => {
-                    if (link.label === 'Projects') {
-                      e.preventDefault();
-                      window.dispatchEvent(new CustomEvent('open-all-projects'));
-                    } else {
-                      handleScrollTo(e, link.href);
-                    }
-                  }}
+                  onClick={(e) => handleScrollTo(e, link.href)}
                   style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
                   className={`text-xs sm:text-[13px] font-semibold transition-colors duration-500 ${
                     isLight
@@ -187,15 +180,7 @@ const Navbar = () => {
             <a
               key={link.label}
               href={link.href}
-              onClick={(e) => {
-                if (link.label === 'Projects') {
-                  e.preventDefault();
-                  setMenuOpen(false);
-                  window.dispatchEvent(new CustomEvent('open-all-projects'));
-                } else {
-                  handleScrollTo(e, link.href);
-                }
-              }}
+              onClick={(e) => handleScrollTo(e, link.href)}
               className={`text-4xl font-bold uppercase tracking-wider transition-colors duration-300 ${
                 isLight ? 'text-neutral-800 hover:text-black' : 'text-white/80 hover:text-white'
               }`}
