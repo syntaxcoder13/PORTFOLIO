@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import useMediaQuery from '../../hooks/useMediaQuery';
 import ProjectDetailsOverlay from '../overlays/ProjectDetailsOverlay';
 import AllProjectsOverlay from '../overlays/AllProjectsOverlay';
 import { ALL_PROJECTS } from '../../data/projects';
@@ -11,157 +9,49 @@ import type { ProjectData } from '../../types/project.types';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FEATURED_PROJECTS: ProjectData[] = ALL_PROJECTS.slice(0, 3);
+const FEATURED_PROJECTS: ProjectData[] = ALL_PROJECTS;
 
 // ---------------------------------------------------------------------------
-// ProjectCard — stacked sticky card with parallax scale effect on desktop
+// ProjectCard — horizontal marquee card matching reference design
 // ---------------------------------------------------------------------------
 interface ProjectCardProps {
   project: ProjectData;
-  index: number;
-  total: number;
-  containerRef: React.RefObject<HTMLDivElement>;
   onViewProject: (project: ProjectData) => void;
 }
 
-const ProjectCard = ({ project, index, total, containerRef, onViewProject }: ProjectCardProps) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const isDesktop = useMediaQuery('(min-width: 1024px)');
-
-  const { scrollYProgress } = useScroll({
-    target: cardRef,
-    offset: ['start end', 'start start'],
-  });
-
-  const targetScale = 1 - (total - 1 - index) * 0.03;
-  const scale = useTransform(scrollYProgress, [0, 1], [1, targetScale]);
-
+const ProjectCard = ({ project, onViewProject }: ProjectCardProps) => {
   return (
     <div
-      ref={cardRef}
-      className="relative lg:sticky top-auto lg:top-[var(--sticky-top)] h-auto lg:h-[78vh] w-full mb-12 lg:mb-0"
-      style={{ '--sticky-top': `${80 + index * 32}px` } as React.CSSProperties}
+      onClick={() => onViewProject(project)}
+      className="group flex flex-col w-[320px] sm:w-[460px] md:w-[540px] shrink-0 rounded-2xl border border-white/10 bg-[#0f0f12] p-5 transition-all duration-500 hover:border-white/20 hover:shadow-[0_15px_40px_rgba(0,0,0,0.6)] cursor-pointer relative overflow-hidden group-hover/track:opacity-40 group-hover/track:blur-[3px] group-hover/track:scale-[0.92] hover:!opacity-100 hover:!blur-none hover:!scale-100"
     >
-      <motion.article
-        style={{ scale: isDesktop ? scale : 1 }}
-        className="origin-top mx-auto h-full w-full flex flex-col lg:grid lg:grid-cols-12 gap-8 rounded-xl border border-white/10 bg-[#0f0f12] p-6 sm:p-8 md:p-10 relative overflow-hidden transition-colors duration-500 hover:border-white/20"
-      >
-        {/* Ambient background light keyed to project accent */}
-        <div
-          className="absolute -top-10 right-0 w-[300px] h-[300px] rounded-full blur-[120px] pointer-events-none opacity-5 transition-opacity duration-500 group-hover:opacity-10"
-          style={{ background: `rgb(${project.accentRgb})` }}
+      {/* Ambient background light keyed to project accent */}
+      <div
+        className="absolute -top-10 right-0 w-[240px] h-[240px] rounded-full blur-[110px] pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-500"
+        style={{ background: `rgb(${project.accentRgb})` }}
+      />
+
+      {/* Project Thumbnail Image */}
+      <div className="w-full aspect-[16/10] rounded-xl overflow-hidden border border-white/5 bg-[#16161a] relative shadow-md">
+        <img
+          src={project.mainImage}
+          alt={`${project.name} preview`}
+          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]"
+          loading="lazy"
+          draggable={false}
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+      </div>
 
-        {/* LEFT COLUMN — Metadata & Typography */}
-        <div className="lg:col-span-5 flex flex-col justify-between h-full z-10">
-          <div className="flex flex-col gap-5">
-            {/* Number + Status badge */}
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xl font-semibold text-white/20">
-                0{project.number}
-              </span>
-              {project.isLive ? (
-                <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded bg-emerald-500/5 border border-emerald-500/15 text-emerald-400">
-                  <span className="relative flex h-1.5 w-1.5 mr-0.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
-                  </span>
-                  Live
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded bg-red-500/5 border border-red-500/15 text-red-400">
-                  <span className="relative flex h-1.5 w-1.5 mr-0.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
-                  </span>
-                  Building
-                </span>
-              )}
-            </div>
-
-            {/* Title */}
-            <h3 className="text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#D7E2EA] hover:text-white transition-colors duration-300">
-              {project.name}
-            </h3>
-
-            {/* Description */}
-            <p className="text-xs sm:text-sm font-light text-[#D7E2EA]/50 leading-relaxed">
-              {project.desc}
-            </p>
-
-            {/* Core Specs Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-y border-white/5 py-4 my-1">
-              <div>
-                <span className="text-[9px] uppercase tracking-widest text-white/20 font-bold block mb-1">Deliverables</span>
-                <ul className="flex flex-col gap-1">
-                  {project.features.map((feat) => (
-                    <li key={feat} className="text-[11px] text-[#D7E2EA]/75 font-medium">✦ {feat}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex flex-col justify-between">
-                <div>
-                  <span className="text-[9px] uppercase tracking-widest text-white/20 font-bold block mb-1">Role</span>
-                  <span className="text-[11px] text-[#D7E2EA]/85 font-semibold uppercase tracking-wider">{project.role}</span>
-                </div>
-                <div className="mt-2">
-                  <span className="text-[9px] uppercase tracking-widest text-white/20 font-bold block mb-1">Year</span>
-                  <span className="text-[11px] text-[#D7E2EA]/60 font-mono">{project.year}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Tech Stack */}
-            <div className="flex flex-wrap gap-2">
-              {project.tech.map((t) => (
-                <span key={t} className="text-[9px] font-semibold uppercase tracking-wider text-[#D7E2EA]/60 bg-white/[0.02] border border-white/5 px-2.5 py-1 rounded">
-                  {t}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Action Button */}
-          <div className="pt-4 mt-6 lg:mt-0 border-t border-white/5">
-            <button
-              onClick={() => onViewProject(project)}
-              className="group/btn inline-flex items-center justify-center w-fit gap-3 rounded-lg border border-white/10 bg-white/[0.01] hover:bg-[#a3e635] hover:border-[#a3e635] px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-white hover:text-black transition-all duration-300 btn-shine"
-            >
-              <span>View Project</span>
-              <ArrowUpRight size={14} className="transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN — Browser Showcase */}
-        <div className="lg:col-span-7 flex items-center justify-center w-full z-10 min-h-[220px] sm:min-h-[300px] lg:min-h-0 flex-1 relative">
-          <div className="w-full aspect-[16/10] lg:aspect-auto lg:h-[88%] rounded-lg border border-white/10 bg-[#16161a] overflow-hidden flex flex-col shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-colors duration-500 hover:border-white/20 relative group/browser">
-            {/* Address bar chrome */}
-            <div className="h-8 bg-[#1f1f24] border-b border-white/5 flex items-center px-4 justify-between shrink-0">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-white/10" />
-                <div className="w-2 h-2 rounded-full bg-white/10" />
-                <div className="w-2 h-2 rounded-full bg-white/10" />
-              </div>
-              <div className="bg-[#121215] text-[9px] text-[#D7E2EA]/30 font-mono px-6 py-0.5 rounded max-w-[180px] text-center tracking-wider truncate">
-                {project.displayUrl}
-              </div>
-              <div className="w-10" />
-            </div>
-            {/* Screenshot */}
-            <div className="flex-1 w-full overflow-hidden bg-[#0c0c0c] relative flex items-center justify-center">
-              <img
-                src={project.mainImage}
-                alt={`${project.name} preview`}
-                className="h-full w-full object-contain transition-transform duration-700 ease-out group-hover/browser:scale-[1.025]"
-                loading="lazy"
-                draggable={false}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
-            </div>
-          </div>
-        </div>
-      </motion.article>
+      {/* Title & Metadata */}
+      <div className="mt-4 flex flex-col gap-2 z-10">
+        <h3 className="text-lg sm:text-2xl font-bold text-white tracking-wide truncate group-hover:text-[#a3e635] transition-colors duration-300">
+          {project.name}
+        </h3>
+        <p className="text-xs sm:text-sm text-[#D7E2EA]/50 font-light truncate">
+          {project.category} • {project.year}
+        </p>
+      </div>
     </div>
   );
 };
@@ -170,7 +60,6 @@ const ProjectCard = ({ project, index, total, containerRef, onViewProject }: Pro
 // ProjectsSection — main section wrapper
 // ---------------------------------------------------------------------------
 const ProjectsSection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const tagRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -178,7 +67,6 @@ const ProjectsSection = () => {
   const descRef = useRef<HTMLParagraphElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
 
-  const isMobile = useMediaQuery('(max-width: 767px)');
   const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
   const [isAllProjectsOpen, setIsAllProjectsOpen] = useState(false);
 
@@ -239,8 +127,6 @@ const ProjectsSection = () => {
     };
   }, []);
 
-  const visibleProjects = isMobile ? FEATURED_PROJECTS.slice(0, 2) : FEATURED_PROJECTS;
-
   return (
     <section
       ref={sectionRef}
@@ -275,30 +161,34 @@ const ProjectsSection = () => {
         </p>
       </div>
 
-      {/* Cards Stack */}
-      <div ref={containerRef} className="mx-auto max-w-7xl">
-        {visibleProjects.map((project, i) => (
-          <ProjectCard
-            key={project.number}
-            project={project}
-            index={i}
-            total={visibleProjects.length}
-            containerRef={containerRef}
-            onViewProject={setSelectedProject}
-          />
-        ))}
+      {/* Cards Marquee Loop */}
+      <div className="relative -mx-6 sm:-mx-12 md:-mx-20 overflow-hidden my-12 py-4">
+        {/* Gradient edge overlays */}
+        <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-[#0C0C0C] via-[#0C0C0C]/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-[#0C0C0C] via-[#0C0C0C]/80 to-transparent z-10 pointer-events-none" />
+
+        {/* Continuous marquee track */}
+        <div className="animate-marquee flex gap-8 sm:gap-12 group/track">
+          {[...FEATURED_PROJECTS, ...FEATURED_PROJECTS, ...FEATURED_PROJECTS, ...FEATURED_PROJECTS].map((project, idx) => (
+            <ProjectCard
+              key={`${project.number}-${idx}`}
+              project={project}
+              onViewProject={setSelectedProject}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* View All Button */}
+      {/* View More Button */}
       <div
         ref={buttonRef}
         className="mt-16 sm:mt-20 flex justify-center z-20 relative opacity-0"
       >
         <button
           onClick={() => setIsAllProjectsOpen(true)}
-          className="group/all-btn inline-flex items-center justify-center gap-3 rounded-full border border-white/20 bg-white/5 px-8 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-widest text-white hover:bg-[#a3e635] hover:border-[#a3e635] hover:text-black transition-all duration-300 btn-shine"
+          className="group/all-btn inline-flex items-center justify-center gap-3 rounded-full border border-[#a3e635]/30 bg-[#a3e635]/5 px-8 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-widest text-[#a3e635] hover:bg-[#a3e635] hover:border-[#a3e635] hover:text-black transition-all duration-300 shadow-[0_0_15px_rgba(163,230,53,0.15)] hover:shadow-[0_0_25px_rgba(163,230,53,0.35)] btn-shine"
         >
-          <span>View All Projects</span>
+          <span>View More</span>
           <ArrowUpRight size={14} className="transition-transform duration-300 group-hover/all-btn:translate-x-0.5 group-hover/all-btn:-translate-y-0.5" />
         </button>
       </div>

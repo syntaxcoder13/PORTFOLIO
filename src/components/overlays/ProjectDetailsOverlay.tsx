@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowUpRight, Github, Calendar, Users, Cpu } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Calendar, Users, Cpu } from 'lucide-react';
 import type { ProjectData } from '../../types/project.types';
 
 interface ProjectDetailsOverlayProps {
@@ -145,15 +145,6 @@ const ProjectDetailsOverlay = ({ project, onClose, totalProjects }: ProjectDetai
                     <Cpu size={14} className="opacity-30" />
                   </button>
                 )}
-                <a
-                  href={project.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group/gh inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.02] hover:border-white/25 hover:bg-white/[0.05] px-6 py-4 text-xs font-bold uppercase tracking-widest text-white/60 hover:text-white transition-all duration-300"
-                >
-                  <Github size={14} />
-                  <span>Source</span>
-                </a>
               </div>
             </div>
 
@@ -191,9 +182,7 @@ const ProjectDetailsOverlay = ({ project, onClose, totalProjects }: ProjectDetai
                 ✦ CASE REPORT
               </span>
               <ul className="flex flex-col gap-3.5 text-[11px] font-bold uppercase tracking-widest text-[#D7E2EA]/30">
-                <li className="text-[#D7E2EA]/80 flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#a3e635]" /> Overview
-                </li>
+                <li className="hover:text-[#D7E2EA]/60 transition-colors duration-300">• Overview</li>
                 <li className="hover:text-[#D7E2EA]/60 transition-colors duration-300">• Key Role</li>
                 <li className="hover:text-[#D7E2EA]/60 transition-colors duration-300">• Metadata</li>
                 <li className="hover:text-[#D7E2EA]/60 transition-colors duration-300">• Challenge</li>
@@ -203,8 +192,8 @@ const ProjectDetailsOverlay = ({ project, onClose, totalProjects }: ProjectDetai
 
             {/* Overview Block */}
             <div className="md:col-span-4 flex flex-col gap-4">
-              <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/25 font-bold">
-                <span className="h-1 w-1 rounded-full bg-white/25" />
+              <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-[#a3e635] font-bold">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#a3e635] shadow-[0_0_6px_#a3e635]" />
                 <span>Overview</span>
               </div>
               <h3 className="text-xl font-bold uppercase text-white tracking-wide">
@@ -217,8 +206,8 @@ const ProjectDetailsOverlay = ({ project, onClose, totalProjects }: ProjectDetai
 
             {/* My Role Block */}
             <div className="md:col-span-4 flex flex-col gap-4">
-              <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/25 font-bold">
-                <span className="h-1 w-1 rounded-full bg-white/25" />
+              <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-[#a3e635] font-bold">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#a3e635] shadow-[0_0_6px_#a3e635]" />
                 <span>My Role</span>
               </div>
               <h3 className="text-xl font-bold uppercase text-white tracking-wide">
@@ -237,8 +226,8 @@ const ProjectDetailsOverlay = ({ project, onClose, totalProjects }: ProjectDetai
             {/* Metadata Block */}
             <div className="md:col-span-2 flex flex-col gap-6 md:pl-4">
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/25 font-bold">
-                  <Calendar size={10} className="text-white/25" />
+                <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-[#a3e635] font-bold">
+                  <Calendar size={10} className="text-[#a3e635]" />
                   <span>Duration</span>
                 </div>
                 <span className="text-sm font-semibold text-white uppercase tracking-wider">
@@ -246,9 +235,9 @@ const ProjectDetailsOverlay = ({ project, onClose, totalProjects }: ProjectDetai
                 </span>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/25 font-bold">
-                  <Users size={10} className="text-white/25" />
-                  <span>Team Size</span>
+                <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-[#a3e635] font-bold">
+                  <Users size={10} className="text-[#a3e635]" />
+                  <span>{project.teamSize.toLowerCase().includes('internship') ? 'Project Type' : 'Team Size'}</span>
                 </div>
                 <span className="text-sm font-semibold text-white uppercase tracking-wider">
                   {project.teamSize}
@@ -264,7 +253,7 @@ const ProjectDetailsOverlay = ({ project, onClose, totalProjects }: ProjectDetai
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                 <div className="lg:col-span-7 flex flex-col gap-4">
                   <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-[#a3e635] font-bold">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#a3e635]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#a3e635] shadow-[0_0_6px_#a3e635]" />
                     <span>The Challenge</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-bold uppercase text-white tracking-tight leading-tight">
@@ -290,7 +279,7 @@ const ProjectDetailsOverlay = ({ project, onClose, totalProjects }: ProjectDetai
           <section className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 pb-12">
             <div className="flex flex-col gap-4 p-6 sm:p-8 rounded-xl border border-white/5 bg-white/[0.01] hover:border-white/10 transition-colors duration-300">
               <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-[#a3e635] font-bold">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#a3e635]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#a3e635] shadow-[0_0_6px_#a3e635]" />
                 <span>The Process</span>
               </div>
               <h3 className="text-xl font-bold uppercase text-white tracking-wide">Solution Architecture</h3>
@@ -298,7 +287,7 @@ const ProjectDetailsOverlay = ({ project, onClose, totalProjects }: ProjectDetai
             </div>
             <div className="flex flex-col gap-4 p-6 sm:p-8 rounded-xl border border-white/5 bg-white/[0.01] hover:border-white/10 transition-colors duration-300">
               <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-emerald-400 font-bold">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
                 <span>The Impact</span>
               </div>
               <h3 className="text-xl font-bold uppercase text-white tracking-wide">Project Outcomes</h3>

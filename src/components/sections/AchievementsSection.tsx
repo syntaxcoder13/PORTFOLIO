@@ -299,9 +299,9 @@ const AchievementsSection = () => {
     };
   }, []);
 
-  const visibleAchievements = isMobile
-    ? ALL_ACHIEVEMENTS.filter((ach) => ach.id === 'aavishkar' || ach.id === 'sheryians')
-    : ALL_ACHIEVEMENTS;
+  const visibleAchievements = ALL_ACHIEVEMENTS.filter(
+    (ach) => ach.id === 'horizon' || ach.id === 'aavishkar' || ach.id === 'sheryians'
+  );
 
   return (
     <section
@@ -358,16 +358,22 @@ const AchievementsSection = () => {
 
         {/* Bento Grid */}
         <div ref={cardsContainerRef} className="relative z-10 grid grid-cols-1 md:grid-cols-6 gap-6 xl:pl-12">
-          {visibleAchievements.map((ach, i) => (
-            <AchievementCard
-              key={ach.id}
-              achievement={ach}
-              displayNumber={`0${i + 1}`}
-              isFlipped={activeCardId === ach.id}
-              onToggleFlip={() => setActiveCardId((prev) => (prev === ach.id ? null : ach.id))}
-              onVideoClick={ach.hasVideo ? () => setVideoOpen(true) : undefined}
-            />
-          ))}
+          {visibleAchievements.map((ach, i) => {
+            const colSpanOverride =
+              ach.id === 'horizon' || ach.id === 'aavishkar'
+                ? 'md:col-span-3'
+                : 'md:col-span-6';
+            return (
+              <AchievementCard
+                key={ach.id}
+                achievement={{ ...ach, colSpan: colSpanOverride }}
+                displayNumber={`0${i + 1}`}
+                isFlipped={activeCardId === ach.id}
+                onToggleFlip={() => setActiveCardId((prev) => (prev === ach.id ? null : ach.id))}
+                onVideoClick={ach.hasVideo ? () => setVideoOpen(true) : undefined}
+              />
+            );
+          })}
         </div>
 
         {/* View All Button */}
