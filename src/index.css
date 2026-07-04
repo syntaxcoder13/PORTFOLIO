@@ -10,13 +10,38 @@
   padding: 0;
 }
 
+/* Lenis smooth scroll official CSS styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 html,
-body,
-#root {
+body {
   background: #0c0c0c;
   font-family: 'Kanit', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  background: #0c0c0c;
   height: 100%;
 }
 
@@ -24,7 +49,6 @@ body {
   min-height: 100vh;
   color: #d7e2ea;
   overflow-x: hidden;
-  /* Lenis requires this */
   overscroll-behavior: none;
 }
 

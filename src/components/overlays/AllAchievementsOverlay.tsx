@@ -569,13 +569,13 @@ const AllAchievementsOverlay = ({ open, onClose }: AllAchievementsOverlayProps) 
                 <div className="absolute left-[70px] md:left-[80px] top-6 bottom-6 w-[1px] bg-white/5 pointer-events-none" />
 
                 {sortedAchievements.length > 0 ? (
-                  sortedAchievements.map((ach) => (
+                  sortedAchievements.map((ach, index) => (
                     <div key={ach.id} className="flex gap-6 md:gap-8 relative group">
                       
                       {/* Timeline axis info (Left side) */}
                       <div className="flex flex-col items-center justify-center shrink-0 w-12 md:w-16 text-center select-none relative z-10">
                         <span className="text-2xl md:text-3xl font-extrabold text-white leading-none">
-                          {ach.number}
+                          {String(index + 1).padStart(2, '0')}
                         </span>
                         <span className="text-[10px] font-bold text-[#D7E2EA]/35 mt-1 tracking-wider">
                           {ach.year}
