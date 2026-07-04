@@ -48,7 +48,7 @@ export const ALL_PROJECTS: ProjectData[] = [
     tagline:
       'CrisisConnect is a next-generation decentralized platform designed to synchronize emergency responders, resource logistics, and victim assistance in real-time.',
     githubUrl: 'https://github.com/syntaxcoder13/CrisisConnect',
-    duration: 'Dec 2026',
+    duration: 'April 2026',
     teamSize: '3 Developers',
     roleName: 'Full Stack Engineer',
     roleBullets: [

@@ -11,54 +11,17 @@ interface AllProjectsOverlayProps {
   onViewProjectDetails: (project: ProjectData) => void;
 }
 
-const FILTERS = ['All', 'Web Apps', 'AI / ML', 'Tools', 'Design', 'Automation'] as const;
+const FILTERS = ['All', 'Website', 'Data Analyst'] as const;
 
 const matchesCategory = (project: ProjectData, filter: string) => {
   if (filter === 'All') return true;
-  const cat = project.category.toLowerCase();
-  const tech = project.tech.map((t) => t.toLowerCase());
-  const name = project.name.toLowerCase();
-  const desc = project.desc.toLowerCase();
-
-  if (filter === 'Web Apps') {
-    return (
-      cat.includes('web') ||
-      cat.includes('platform') ||
-      cat.includes('app') ||
-      tech.includes('next.js') ||
-      tech.includes('react')
-    );
+  if (filter === 'Website') {
+    // All current projects are websites/web platforms
+    return true;
   }
-  if (filter === 'AI / ML') {
-    return (
-      cat.includes('ai') ||
-      cat.includes('ml') ||
-      tech.includes('gemini') ||
-      tech.includes('openai') ||
-      cat.includes('intelligence')
-    );
-  }
-  if (filter === 'Tools') {
-    return (
-      cat.includes('tool') ||
-      cat.includes('utility') ||
-      cat.includes('dashboard') ||
-      tech.includes('chart.js')
-    );
-  }
-  if (filter === 'Design') {
-    return (
-      cat.includes('design') ||
-      cat.includes('ui/ux') ||
-      cat.includes('creative')
-    );
-  }
-  if (filter === 'Automation') {
-    return (
-      cat.includes('automation') ||
-      cat.includes('script') ||
-      cat.includes('bot')
-    );
+  if (filter === 'Data Analyst') {
+    // No projects currently exist for Data Analyst
+    return false;
   }
   return true;
 };
@@ -68,7 +31,9 @@ const AllProjectsOverlay = ({ open, onClose, onViewProjectDetails }: AllProjects
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'Latest' | 'Oldest'>('Latest');
   const [currentPage, setCurrentPage] = useState(1);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const PAGE_SIZE = 6;
 
@@ -81,6 +46,17 @@ const AllProjectsOverlay = ({ open, onClose, onViewProjectDetails }: AllProjects
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   // Lock body scroll / pause Lenis while open
   useEffect(() => {
@@ -127,10 +103,12 @@ const AllProjectsOverlay = ({ open, onClose, onViewProjectDetails }: AllProjects
 
   // 2. Sort
   const sortedProjects = [...filteredProjects].sort((a, b) => {
+    const numA = parseInt(a.number, 10) || 0;
+    const numB = parseInt(b.number, 10) || 0;
     if (sortBy === 'Latest') {
-      return parseInt(b.year) - parseInt(a.year);
+      return numB - numA;
     } else {
-      return parseInt(a.year) - parseInt(b.year);
+      return numA - numB;
     }
   });
 
@@ -295,16 +273,52 @@ const AllProjectsOverlay = ({ open, onClose, onViewProjectDetails }: AllProjects
               </div>
 
               {/* Sorting Dropdown */}
-              <div className="relative shrink-0 w-32">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="w-full bg-[#0f0f12] border border-white/5 focus:border-[#a3e635]/50 focus:outline-none rounded-full px-5 py-2.5 text-[10px] text-white appearance-none pr-10 cursor-pointer transition-colors duration-300 font-bold uppercase tracking-wider"
+              <div className="relative shrink-0 w-32" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="w-full bg-[#0f0f12] border border-white/5 focus:border-[#a3e635]/50 focus:outline-none rounded-full px-5 py-2.5 text-[10px] text-white flex items-center justify-between cursor-pointer transition-colors duration-300 font-bold uppercase tracking-wider"
                 >
-                  <option value="Latest">Latest</option>
-                  <option value="Oldest">Oldest</option>
-                </select>
-                <ChevronDown size={13} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#D7E2EA]/30 pointer-events-none" />
+                  <span>{sortBy}</span>
+                  <ChevronDown
+                    size={13}
+                    className={`text-[#D7E2EA]/30 transition-transform duration-300 ${dropdownOpen ? 'rotate-180 text-[#a3e635]' : ''}`}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-[110%] right-0 w-full bg-[#0f0f12] border border-white/10 rounded-xl py-1.5 z-50 shadow-[0_10px_30px_rgba(0,0,0,0.8)] overflow-hidden"
+                    >
+                      <button
+                        onClick={() => {
+                          setSortBy('Latest');
+                          setDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-5 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors duration-200 ${
+                          sortBy === 'Latest' ? 'text-[#a3e635] bg-[#a3e635]/5' : 'text-[#D7E2EA]/60 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        Latest
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSortBy('Oldest');
+                          setDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-5 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors duration-200 ${
+                          sortBy === 'Oldest' ? 'text-[#a3e635] bg-[#a3e635]/5' : 'text-[#D7E2EA]/60 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        Oldest
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>

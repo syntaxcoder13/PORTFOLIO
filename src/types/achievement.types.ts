@@ -16,4 +16,5 @@ export interface AchievementData {
   colSpan: string;
   iconType: 'trophy' | 'lightbulb';
   hasVideo?: boolean;
+  year: string;
 }
