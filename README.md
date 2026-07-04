@@ -55,12 +55,6 @@ src/
     └── AnimatedText.tsx       # char-by-char scroll-driven reveal
 ```
 
-## Featured projects
-
-| Project | Live | Built with |
-|---|---|---|
-| ResumeIQ | [resumeiq-harsh.vercel.app](https://resumeiq-harsh.vercel.app) | React, Gemini API, Vercel |
-| Notch | [notch-zeta.vercel.app](https://notch-zeta.vercel.app) | React, Tailwind, Framer Motion |
 
 ## Customisation
 
