@@ -18,17 +18,16 @@ const App = () => {
   useEffect(() => {
     // Lenis smooth scroll
     const lenis = new Lenis({
-      duration: 1.4,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 0.9,
+      wheelMultiplier: 1.0,
       touchMultiplier: 1.5,
     });
 
     (window as any).lenis = lenis;
-    lenis.stop(); // Start stopped during loading screen
+    lenis.stop();
 
-    // Keep GSAP ScrollTrigger in sync with Lenis
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -54,17 +53,16 @@ const App = () => {
   return (
     <>
       {loading && <Preloader onComplete={() => setLoading(false)} />}
-      <main
-        className="relative w-full"
-        style={{ overflowX: 'clip', background: '#0C0C0C' }}
-      >
+      <div className="min-h-screen bg-[#0C0C0C] text-[#D7E2EA] font-sans selection:bg-[#a3e635] selection:text-black">
         <Navbar />
-        <HeroSection />
-        <AboutSection />
-        <ProjectsSection />
-        <AchievementsSection />
-        <ContactSection />
-      </main>
+        <main>
+          <HeroSection />
+          <AboutSection />
+          <ProjectsSection />
+          <AchievementsSection />
+          <ContactSection />
+        </main>
+      </div>
     </>
   );
 };

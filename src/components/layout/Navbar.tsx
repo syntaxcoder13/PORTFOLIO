@@ -8,22 +8,30 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Navbar = () => {
   const navbarRef = useRef<HTMLDivElement>(null);
-  const [isLight, setIsLight] = useState(false);
+  const [isLight, setIsLight] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('About');
 
-  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string, label: string) => {
     e.preventDefault();
     setMenuOpen(false);
+    setActiveTab(label);
 
     const lenis = (window as any).lenis;
+    if (href === '#hero') {
+      if (lenis) lenis.scrollTo(0);
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (lenis) {
       let scrollTarget: any = href;
 
       const triggerId =
-        href === '#about'        ? 'about-pin'          :
-        href === '#projects'     ? 'projects-scroll'    :
-        href === '#achievements' ? 'achievements-scroll':
-        href === '#contact'      ? 'contact-scroll'     : null;
+        href === '#about' ? 'about-pin' :
+          href === '#projects' ? 'projects-scroll' :
+            href === '#achievements' ? 'achievements-scroll' :
+              href === '#contact' ? 'contact-scroll' : null;
 
       if (triggerId) {
         const trigger = ScrollTrigger.getById(triggerId);
@@ -38,19 +46,28 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    gsap.fromTo(navbarRef.current,
-      { y: -60, opacity: 0 },
+    gsap.fromTo(
+      navbarRef.current,
+      { y: -50, opacity: 0 },
       { y: 0, opacity: 1, duration: 1.0, ease: 'power3.out' }
     );
 
-    const LIGHT_IDS = new Set(['about', 'achievements']);
+    const LIGHT_IDS = new Set(['hero', 'about', 'projects', 'achievements', 'contact']);
 
     const checkTheme = () => {
-      const navH = (navbarRef.current?.offsetHeight ?? 56) + 2;
+      const navH = (navbarRef.current?.offsetHeight ?? 60) + 20;
       const el = document.elementFromPoint(window.innerWidth / 2, navH);
       if (!el) return;
       const section = el.closest('section');
-      setIsLight(section ? LIGHT_IDS.has(section.id) : false);
+      if (section && section.id) {
+        setIsLight(LIGHT_IDS.has(section.id));
+
+        // Update active nav tab based on active section
+        if (section.id === 'about') setActiveTab('About');
+        else if (section.id === 'projects') setActiveTab('Projects');
+        else if (section.id === 'achievements') setActiveTab('Achievements');
+        else if (section.id === 'contact') setActiveTab('Contact');
+      }
     };
 
     checkTheme();
@@ -81,16 +98,11 @@ const Navbar = () => {
     <>
       <header
         ref={navbarRef}
-        className="fixed top-0 left-0 w-full z-50 border-b transition-all duration-500"
-        style={{
-          opacity: 0,
-          backgroundColor: isLight ? 'rgba(244,243,239,0.85)' : 'rgba(12,12,12,0.85)',
-          borderColor: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)',
-          backdropFilter: 'blur(14px)',
-        }}
+        className="fixed top-0 left-0 w-full z-50 transition-all duration-500 py-3 sm:py-4 px-6 md:px-12"
+        style={{ opacity: 0 }}
       >
         <nav
-          className="flex items-center justify-between px-6 md:px-10 py-2.5 md:py-3 max-w-7xl mx-auto w-full"
+          className="flex items-center justify-between max-w-7xl mx-auto w-full"
           aria-label="Main navigation"
         >
           {/* Logo */}
@@ -105,60 +117,79 @@ const Navbar = () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }
             }}
-            style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
-            className={`text-base sm:text-lg font-bold uppercase tracking-tight select-none transition-colors duration-500 hover:opacity-85 ${isLight ? 'text-black' : 'text-white'}`}
+            className={`flex items-baseline gap-0.5 text-lg sm:text-xl font-bold tracking-tight select-none transition-colors duration-500 hover:opacity-85 ${isLight ? 'text-neutral-900' : 'text-white'
+              }`}
+            style={{ fontFamily: '"Plus Jakarta Sans", Inter, sans-serif' }}
           >
-            ARNAY.
+            <span>Arnay</span>
+            <span className="text-[10px] text-neutral-400 font-semibold align-top relative -top-1.5">®</span>
           </a>
 
-          {/* Desktop Navigation Links */}
-          <ul className="hidden md:flex items-center gap-6 lg:gap-8">
-            {NAV_LINKS.map((link) => (
-              <li key={link.label}>
+          {/* Desktop Floating Pill Navigation (Matching Reference Image) */}
+          <div
+            className={`hidden md:flex items-center p-1 rounded-full border transition-all duration-500 backdrop-blur-xl ${isLight
+                ? 'bg-neutral-200/50 border-neutral-300/60 shadow-[0_2px_12px_rgba(0,0,0,0.03)]'
+                : 'bg-neutral-900/70 border-white/10 shadow-[0_2px_12px_rgba(0,0,0,0.4)]'
+              }`}
+          >
+            {NAV_LINKS.map((link) => {
+              const isActive = activeTab === link.label;
+              return (
                 <a
+                  key={link.label}
                   href={link.href}
-                  onClick={(e) => handleScrollTo(e, link.href)}
-                  style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
-                  className={`text-xs sm:text-[13px] font-semibold transition-colors duration-500 ${
-                    isLight
-                      ? 'text-neutral-700 hover:text-neutral-950'
-                      : 'text-white/60 hover:text-white'
-                  }`}
+                  onClick={(e) => handleScrollTo(e, link.href, link.label)}
+                  style={{ fontFamily: '"Plus Jakarta Sans", Inter, sans-serif' }}
+                  className={`relative px-4 sm:px-5 py-1.5 text-xs sm:text-[13px] rounded-full transition-all duration-300 ${isActive
+                      ? isLight
+                        ? 'bg-white text-neutral-950 font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+                        : 'bg-white/20 text-white font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.3)]'
+                      : isLight
+                        ? 'text-neutral-600 hover:text-neutral-950 font-medium'
+                        : 'text-neutral-400 hover:text-white font-medium'
+                    }`}
                 >
                   {link.label}
                 </a>
-              </li>
-            ))}
-          </ul>
+              );
+            })}
+          </div>
 
-          <div className="flex items-center gap-4">
-            {/* Desktop CTA */}
+          <div className="flex items-center gap-3">
+            {/* Desktop Action Button (Dark Pill CTA) */}
             <a
               href="#contact"
-              onClick={(e) => handleScrollTo(e, '#contact')}
-              style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
-              className={`hidden md:inline-flex items-center gap-1.5 rounded-full border px-6 py-2.5 text-xs sm:text-[13px] font-bold transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] ${
-                isLight
-                  ? 'border-black/30 text-black hover:bg-black hover:text-white hover:border-black'
-                  : 'border-white/25 text-white hover:bg-[#a3e635] hover:text-black hover:border-[#a3e635]'
-              }`}
+              onClick={(e) => handleScrollTo(e, '#contact', 'Contact')}
+              style={{ fontFamily: '"Plus Jakarta Sans", Inter, sans-serif' }}
+              className={`hidden md:inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-xs sm:text-[13px] font-medium transition-all duration-300 shadow-sm hover:scale-[1.02] active:scale-[0.98] ${isLight
+                  ? 'bg-[#111111] hover:bg-black text-white shadow-[0_4px_12px_rgba(0,0,0,0.1)]'
+                  : 'bg-white hover:bg-neutral-200 text-neutral-950 shadow-[0_4px_12px_rgba(255,255,255,0.1)]'
+                }`}
             >
-              <span>Let's Connect</span>
+              <span>Get in touch</span>
               <ArrowUpRight size={13} />
             </a>
 
-            {/* Hamburger Toggle (Mobile) */}
+            {/* Hamburger Toggle for Mobile */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`relative w-10 h-10 flex items-center justify-center md:hidden focus:outline-none z-50 transition-colors duration-500 ${
-                isLight ? 'text-black' : 'text-white'
-              }`}
+              className={`relative w-10 h-10 flex items-center justify-center md:hidden focus:outline-none z-50 transition-colors duration-500 rounded-full ${isLight ? 'bg-neutral-200/70 text-neutral-900' : 'bg-white/10 text-white'
+                }`}
               aria-label="Toggle Menu"
             >
-              <div className="relative w-6 h-5 flex flex-col justify-between">
-                <span className={`h-0.5 w-full bg-current rounded-full transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[9px]' : ''}`} />
-                <span className={`h-0.5 w-full bg-current rounded-full transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
-                <span className={`h-0.5 w-full bg-current rounded-full transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[9px]' : ''}`} />
+              <div className="relative w-5 h-4 flex flex-col justify-between">
+                <span
+                  className={`h-0.5 w-full bg-current rounded-full transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[7px]' : ''
+                    }`}
+                />
+                <span
+                  className={`h-0.5 w-full bg-current rounded-full transition-all duration-300 ${menuOpen ? 'opacity-0' : ''
+                    }`}
+                />
+                <span
+                  className={`h-0.5 w-full bg-current rounded-full transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[7px]' : ''
+                    }`}
+                />
               </div>
             </button>
           </div>
@@ -167,11 +198,10 @@ const Navbar = () => {
 
       {/* Mobile Menu Panel */}
       <div
-        className={`fixed inset-x-0 top-0 h-screen transition-all duration-500 ease-in-out md:hidden flex flex-col justify-center px-8 z-40 ${
-          menuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
-        }`}
+        className={`fixed inset-x-0 top-0 h-screen transition-all duration-500 ease-in-out md:hidden flex flex-col justify-center px-8 z-40 ${menuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
+          }`}
         style={{
-          backgroundColor: isLight ? 'rgba(244,243,239,0.98)' : 'rgba(12,12,12,0.98)',
+          backgroundColor: isLight ? 'rgba(250,249,246,0.98)' : 'rgba(12,12,12,0.98)',
           backdropFilter: 'blur(20px)',
         }}
       >
@@ -180,13 +210,12 @@ const Navbar = () => {
             <a
               key={link.label}
               href={link.href}
-              onClick={(e) => handleScrollTo(e, link.href)}
-              className={`text-4xl font-bold uppercase tracking-wider transition-colors duration-300 ${
-                isLight ? 'text-neutral-800 hover:text-black' : 'text-white/80 hover:text-white'
-              }`}
+              onClick={(e) => handleScrollTo(e, link.href, link.label)}
+              className={`text-3xl font-bold uppercase tracking-wider transition-colors duration-300 ${isLight ? 'text-neutral-800 hover:text-black' : 'text-white/80 hover:text-white'
+                }`}
               style={{
                 fontFamily: '"Bebas Neue", sans-serif',
-                transitionDelay: `${i * 75}ms`,
+                transitionDelay: `${i * 60}ms`,
               }}
             >
               {link.label}
@@ -194,15 +223,14 @@ const Navbar = () => {
           ))}
           <a
             href="#contact"
-            onClick={(e) => handleScrollTo(e, '#contact')}
-            className={`mt-4 inline-flex items-center justify-center gap-2 rounded-full border px-8 py-3.5 text-sm font-bold uppercase tracking-widest transition-all duration-300 ${
-              isLight
-                ? 'border-black text-black hover:bg-black hover:text-white'
-                : 'border-white text-white hover:bg-[#a3e635] hover:text-black hover:border-[#a3e635]'
-            }`}
-            style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
+            onClick={(e) => handleScrollTo(e, '#contact', 'Contact')}
+            className={`mt-4 inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold transition-all duration-300 ${isLight
+                ? 'bg-[#111111] text-white hover:bg-black'
+                : 'bg-white text-black hover:bg-neutral-200'
+              }`}
+            style={{ fontFamily: '"Plus Jakarta Sans", Inter, sans-serif' }}
           >
-            <span>Let's Connect</span>
+            <span>Get in touch</span>
             <ArrowUpRight size={14} />
           </a>
         </nav>

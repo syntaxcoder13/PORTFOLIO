@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ArrowUpRight, ExternalLink, Github, Eye, Sparkles } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ProjectDetailsOverlay from '../overlays/ProjectDetailsOverlay';
@@ -9,191 +9,433 @@ import type { ProjectData } from '../../types/project.types';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FEATURED_PROJECTS: ProjectData[] = ALL_PROJECTS;
-
-// ---------------------------------------------------------------------------
-// ProjectCard — horizontal marquee card matching reference design
-// ---------------------------------------------------------------------------
-interface ProjectCardProps {
-  project: ProjectData;
-  onViewProject: (project: ProjectData) => void;
+interface EditorialProjectItem extends ProjectData {
+  roleCategory: string;
+  awardsText: string[];
+  clientOrOrg: string;
 }
 
-const ProjectCard = ({ project, onViewProject }: ProjectCardProps) => {
-  return (
-    <div
-      onClick={() => onViewProject(project)}
-      className="group flex flex-col w-[320px] sm:w-[460px] md:w-[540px] shrink-0 rounded-2xl border border-white/10 bg-[#0f0f12] p-5 transition-all duration-500 hover:border-white/20 hover:shadow-[0_15px_40px_rgba(0,0,0,0.6)] cursor-pointer relative overflow-hidden group-hover/track:opacity-40 group-hover/track:blur-[3px] group-hover/track:scale-[0.92] hover:!opacity-100 hover:!blur-none hover:!scale-100"
-    >
-      {/* Ambient background light keyed to project accent */}
-      <div
-        className="absolute -top-10 right-0 w-[240px] h-[240px] rounded-full blur-[110px] pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-500"
-        style={{ background: `rgb(${project.accentRgb})` }}
-      />
+const EDITORIAL_PROJECTS: EditorialProjectItem[] = [
+  {
+    ...ALL_PROJECTS[0],
+    number: '01',
+    name: 'HireMetrics AI',
+    category: 'Autonomous Voice Screening Platform',
+    roleCategory: 'Lead Developer\nAI & Voice Architect',
+    clientOrOrg: 'AI Talent Acquisition Suite',
+    awardsText: ['90% HR Overhead Reduced', 'Real-Time Voice Synthesis', '<240ms Latency'],
+    desc: 'An AI-powered candidate interview platform designed to conduct autonomous spoken assessments, evaluate technical responses dynamically, and aggregate recruiter pipelines.',
+  },
+  {
+    ...ALL_PROJECTS[1],
+    number: '02',
+    name: 'CrisisConnect',
+    category: 'Mission Control & AI Emergency Triage',
+    roleCategory: 'Full Stack Engineer\nGeospatial Dev',
+    clientOrOrg: 'Tactical Disaster Telemetry',
+    awardsText: ['60% Faster Dispatch', 'Hands-Free AI Voice Triage', 'Offline PWA Cache'],
+    desc: 'A next-generation decentralized platform designed to synchronize emergency responders, resource logistics, and victim assistance in real-time with live geospatial maps.',
+  },
+  {
+    ...ALL_PROJECTS[2],
+    number: '03',
+    name: 'Learnivo AI',
+    category: 'EdTech Lesson Planning Engine',
+    roleCategory: 'Frontend Design Intern\nUI/UX Architect',
+    clientOrOrg: 'Vasudev AI Labs',
+    awardsText: ['55K+ Teachers Onboarded', '2.1M Lesson Plans Generated', 'Regional Language Support'],
+    desc: 'An AI-driven curriculum planning assistant designed for modern Indian classrooms to automate lesson generation, worksheet creation, and administrative workflows.',
+  },
+  {
+    ...ALL_PROJECTS[3],
+    number: '04',
+    name: 'Bhavna Portal',
+    category: 'Vocational Training & Course Discovery',
+    roleCategory: 'Frontend Dev Intern\nInteraction Dev',
+    clientOrOrg: 'Bhavna Institute Meerut',
+    awardsText: ['12K+ Active Enrollments', '24 Job-Ready Modules', '100% Responsive Catalog'],
+    desc: 'A centralized educational discovery platform built to showcase practical job-oriented computer training programs and simplify demo class registrations.',
+  },
+];
 
-      {/* Project Thumbnail Image */}
-      <div className="w-full aspect-[16/10] rounded-xl overflow-hidden border border-white/5 bg-[#16161a] relative shadow-md">
-        <img
-          src={project.mainImage}
-          alt={`${project.name} preview`}
-          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]"
-          loading="lazy"
-          draggable={false}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
-      </div>
-
-      {/* Title & Metadata */}
-      <div className="mt-4 flex flex-col gap-2 z-10">
-        <h3 className="text-lg sm:text-2xl font-bold text-white tracking-wide truncate group-hover:text-[#a3e635] transition-colors duration-300">
-          {project.name}
-        </h3>
-        <p className="text-xs sm:text-sm text-[#D7E2EA]/50 font-light truncate">
-          {project.category} • {project.year}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// ---------------------------------------------------------------------------
-// ProjectsSection — main section wrapper
-// ---------------------------------------------------------------------------
 const ProjectsSection = () => {
-  const sectionRef = useRef<HTMLElement>(null);
-  const tagRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
-  const descRef = useRef<HTMLParagraphElement>(null);
-  const buttonRef = useRef<HTMLDivElement>(null);
-
+  const [activeProjectIndex, setActiveProjectIndex] = useState<number>(0);
   const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
   const [isAllProjectsOpen, setIsAllProjectsOpen] = useState(false);
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
 
+  const activeProject = EDITORIAL_PROJECTS[activeProjectIndex];
 
-  // GSAP scroll entry animations
+  // GSAP ScrollTrigger to detect which project card on the left is in focus
   useEffect(() => {
-    const triggerEl = sectionRef.current;
-    if (!triggerEl) return;
+    const sectionEl = sectionRef.current;
+    if (!sectionEl) return;
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: triggerEl,
-        start: 'top 80%',
-        toggleActions: 'play none none none',
-        id: 'projects-header-trigger',
-      },
-    });
+    const ctx = gsap.context(() => {
+      cardRefs.current.forEach((card, idx) => {
+        if (!card) return;
 
-    tl.fromTo(
-      [tagRef.current, titleRef.current, lineRef.current, descRef.current],
-      { y: 45, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, stagger: 0.12, ease: 'power3.out' }
-    );
+        ScrollTrigger.create({
+          trigger: card,
+          start: 'top 55%',
+          end: 'bottom 45%',
+          onEnter: () => setActiveProjectIndex(idx),
+          onEnterBack: () => setActiveProjectIndex(idx),
+        });
+      });
+    }, sectionRef);
 
-    const btnTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: buttonRef.current,
-        start: 'top 90%',
-        toggleActions: 'play none none none',
-        id: 'projects-button-trigger',
-      },
-    });
-
-    btnTl.fromTo(
-      buttonRef.current,
-      { y: 25, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }
-    );
-
-    const scrollTrigger = ScrollTrigger.create({
-      trigger: triggerEl,
-      start: 'top top',
-      id: 'projects-scroll',
-    });
-
-    return () => {
-      tl.scrollTrigger?.kill();
-      tl.kill();
-      btnTl.scrollTrigger?.kill();
-      btnTl.kill();
-      scrollTrigger.kill();
-    };
+    return () => ctx.revert();
   }, []);
+
+  // Smooth cross-fade when active project changes
+  useEffect(() => {
+    if (rightPanelRef.current) {
+      gsap.fromTo(
+        rightPanelRef.current,
+        { opacity: 0.35, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }
+      );
+    }
+  }, [activeProjectIndex]);
+
+  const scrollToProjectCard = (idx: number) => {
+    const targetCard = cardRefs.current[idx];
+    if (targetCard) {
+      targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   return (
     <section
       ref={sectionRef}
       id="projects"
-      className="relative z-30 w-full rounded-t-2xl sm:rounded-t-3xl bg-[#0C0C0C] px-6 sm:px-12 md:px-20 pt-20 sm:pt-24 md:pt-32 pb-24 border-t border-white/10 shadow-[0_-25px_60px_rgba(0,0,0,0.45)]"
+      className="relative z-30 w-full min-h-screen bg-[#FAF9F6] text-neutral-900 py-20 sm:py-28 px-6 sm:px-10 md:px-16 overflow-visible select-none"
+      style={{
+        background:
+          'radial-gradient(ellipse 95% 85% at 50% 15%, #FFFFFF 0%, #FAF8F5 50%, #ECE8E1 100%)',
+      }}
     >
-      {/* Editorial Header */}
-      <div className="max-w-7xl mx-auto w-full mb-16 sm:mb-20 md:mb-24 flex flex-col items-start gap-5 text-left">
-        <div
-          ref={tagRef}
-          className="flex items-center gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#D7E2EA]/50 select-none opacity-0"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-[#a3e635] shadow-[0_0_6px_#a3e635]" />
-          <span>Portfolio</span>
+      {/* Background Subtle Accent Grids matching Hero/About */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:28px_28px]" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-white/70 rounded-full blur-[140px] pointer-events-none -z-10" />
+
+      <div className="relative z-20 max-w-[1600px] mx-auto w-full">
+        
+        {/* ================= SECTION HEADER (Matching Hero & About Theme) ================= */}
+        <div className="mb-16 sm:mb-24 text-center max-w-4xl mx-auto flex flex-col items-center gap-4 sm:gap-5">
+          {/* Top Pill */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-neutral-300 bg-white/80 backdrop-blur-md shadow-xs text-xs font-mono tracking-widest text-neutral-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>[ 02 / SELECTED CASE STUDIES ]</span>
+          </div>
+
+          {/* Main Editorial Headline */}
+          <h2
+            style={{ fontFamily: '"Playfair Display", "Newsreader", "Instrument Serif", Georgia, serif' }}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] text-[#111111] font-normal tracking-tight leading-[1.08]"
+          >
+            Crafted with intent <br />
+            <span className="italic font-normal text-neutral-700">& engineering excellence.</span>
+          </h2>
+
+          {/* Subtitle */}
+          <p
+            style={{ fontFamily: '"Plus Jakarta Sans", Inter, sans-serif' }}
+            className="text-xs sm:text-sm md:text-[15px] text-neutral-600 max-w-xl mx-auto font-normal leading-relaxed"
+          >
+            A curated showcase of high-performance web applications, autonomous AI architectures, and interactive digital brand experiences.
+          </p>
         </div>
 
-        <h2
-          ref={titleRef}
-          style={{ fontFamily: '"Bebas Neue", sans-serif' }}
-          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-wider text-white leading-[1.05] opacity-0"
-        >
-          Featured <span className="text-[#a3e635]">Projects</span>
-        </h2>
+        {/* Main Split-Screen Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          
+          {/* ================= LEFT COLUMN: Natural Vertical Scrolling Project Cards ================= */}
+          <div className="lg:col-span-7 flex flex-col gap-16 sm:gap-24">
+            
+            {EDITORIAL_PROJECTS.map((project, idx) => {
+              const isActive = activeProjectIndex === idx;
 
-        <div ref={lineRef} className="w-12 h-[2px] bg-white/10 my-2 opacity-0" />
+              return (
+                <div
+                  key={project.number}
+                  ref={(el) => (cardRefs.current[idx] = el)}
+                  onClick={() => setSelectedProject(project)}
+                  className={`group relative flex flex-col gap-4 cursor-pointer transition-all duration-500 bg-white/90 backdrop-blur-xl border border-white/90 sm:border-neutral-200/80 rounded-3xl p-4 sm:p-6 shadow-[0_18px_45px_rgba(0,0,0,0.06)] hover:shadow-[0_28px_65px_rgba(0,0,0,0.12)] hover:border-neutral-300 ${
+                    isActive ? 'opacity-100 ring-2 ring-neutral-900/10' : 'opacity-85'
+                  }`}
+                >
+                  {/* Card Header Bar */}
+                  <div className="flex items-center justify-between pb-3 border-b border-neutral-100 text-xs font-mono">
+                    <div className="flex items-center gap-3">
+                      <span className="px-3 py-1 rounded-full bg-neutral-900 text-white font-bold tracking-wider text-[11px]">
+                        {project.number}
+                      </span>
+                      <span className="text-neutral-900 font-bold uppercase tracking-wider text-[13px]">
+                        {project.name}
+                      </span>
+                    </div>
 
-        <p
-          ref={descRef}
-          className="text-sm sm:text-base md:text-lg font-light text-[#D7E2EA]/65 max-w-xl leading-relaxed opacity-0"
-        >
-          Featured projects and web platforms I have built recently
-        </p>
-      </div>
+                    <span className="px-3 py-1 rounded-full bg-neutral-100/90 border border-neutral-200/70 text-neutral-600 text-[11px] hidden sm:inline uppercase tracking-widest font-medium">
+                      {project.category}
+                    </span>
+                  </div>
 
-      {/* Cards Marquee Loop */}
-      <div className="relative -mx-6 sm:-mx-12 md:-mx-20 overflow-hidden my-12 py-4">
-        {/* Gradient edge overlays */}
-        <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-[#0C0C0C] via-[#0C0C0C]/80 to-transparent z-10 pointer-events-none" />
-        <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-[#0C0C0C] via-[#0C0C0C]/80 to-transparent z-10 pointer-events-none" />
+                  {/* Main Cinematic Image Card */}
+                  <div className="relative w-full aspect-[16/10] sm:aspect-[16/9.5] rounded-2xl overflow-hidden bg-neutral-100 border border-neutral-200/80">
+                    <img
+                      src={project.mainImage}
+                      alt={project.name}
+                      className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+                      loading="lazy"
+                    />
 
-        {/* Continuous marquee track */}
-        <div className="animate-marquee flex gap-8 sm:gap-12 group/track">
-          {[...FEATURED_PROJECTS, ...FEATURED_PROJECTS, ...FEATURED_PROJECTS, ...FEATURED_PROJECTS].map((project, idx) => (
-            <ProjectCard
-              key={`${project.number}-${idx}`}
-              project={project}
-              onViewProject={setSelectedProject}
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
+
+                    {/* Hover Action Center Badge */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                      <div className="px-6 py-3 rounded-full bg-neutral-950 text-white font-mono font-bold text-xs uppercase tracking-widest flex items-center gap-2 shadow-2xl scale-95 group-hover:scale-100 transition-transform">
+                        <Eye size={14} />
+                        <span>VIEW CASE STUDY</span>
+                        <ArrowUpRight size={14} />
+                      </div>
+                    </div>
+
+                    {/* Bottom Image Info Strip */}
+                    <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between pointer-events-none">
+                      <div>
+                        <span className="block text-base sm:text-xl font-bold text-white tracking-tight uppercase drop-shadow-md">
+                          {project.name}
+                        </span>
+                        <span className="text-xs text-white/80 font-mono">
+                          {project.displayUrl}
+                        </span>
+                      </div>
+
+                      <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-white/90 border border-white/20 uppercase font-semibold">
+                        EXPAND ↗
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+          </div>
+
+          {/* ================= RIGHT COLUMN: Sticky Editorial Info Panel (Desktop only) ================= */}
+          <div className="hidden lg:block lg:col-span-5 lg:sticky lg:top-20 xl:top-24">
+            
+            <div
+              ref={rightPanelRef}
+              className="bg-white/90 backdrop-blur-xl border border-neutral-200/80 rounded-3xl p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.06)] flex flex-col justify-between space-y-4 sm:space-y-4.5 text-left"
+            >
+              {/* 1. Quick Project Jump Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-neutral-100">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {EDITORIAL_PROJECTS.map((p, idx) => {
+                    const isActive = activeProjectIndex === idx;
+                    return (
+                      <button
+                        key={p.number}
+                        onClick={() => scrollToProjectCard(idx)}
+                        className={`px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-mono font-bold tracking-wider transition-all duration-300 cursor-pointer ${
+                          isActive
+                            ? 'bg-neutral-950 text-white shadow-md scale-105'
+                            : 'bg-neutral-100 text-neutral-600 hover:text-neutral-950 hover:bg-neutral-200'
+                        }`}
+                      >
+                        {p.number}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center gap-1.5 text-neutral-400">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-neutral-900">
+                    <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" />
+                  </svg>
+                  <span className="text-[10px] font-mono tracking-widest uppercase font-bold text-neutral-500">
+                    0{EDITORIAL_PROJECTS.length} CASES
+                  </span>
+                </div>
+              </div>
+
+              {/* 2. Editorial Headline with Serif Touch */}
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-mono tracking-widest text-neutral-500 uppercase font-bold">
+                    IN FOCUS [{activeProject.number} / 0{EDITORIAL_PROJECTS.length}]
+                  </span>
+                </div>
+
+                <h3
+                  style={{ fontFamily: '"Playfair Display", "Newsreader", "Instrument Serif", Georgia, serif' }}
+                  className="text-2xl sm:text-3xl lg:text-[32px] font-normal tracking-tight text-neutral-950 leading-tight"
+                >
+                  {activeProject.name}
+                </h3>
+                <p className="text-[11px] font-mono text-neutral-500 uppercase tracking-wider mt-0.5">
+                  {activeProject.category}
+                </p>
+              </div>
+
+              {/* 3. Structured Metadata Grid (INFO, ROLE, AWARDS, DEV) in Clean Soft Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
+                
+                {/* INFO Column */}
+                <div className="bg-neutral-50/80 border border-neutral-200/60 rounded-xl p-3 space-y-1">
+                  <span className="text-neutral-400 font-mono font-bold uppercase tracking-widest block text-[9.5px]">
+                    OVERVIEW
+                  </span>
+                  <p className="text-neutral-700 leading-snug font-normal text-[11px] line-clamp-3">
+                    {activeProject.desc}
+                  </p>
+                </div>
+
+                {/* ROLE Column */}
+                <div className="bg-neutral-50/80 border border-neutral-200/60 rounded-xl p-3 space-y-1">
+                  <span className="text-neutral-400 font-mono font-bold uppercase tracking-widest block text-[9.5px]">
+                    ROLE & CONTRIBUTION
+                  </span>
+                  <div className="text-neutral-900 font-bold leading-tight whitespace-pre-line font-mono text-[11px]">
+                    {activeProject.roleCategory}
+                  </div>
+                </div>
+
+                {/* AWARDS / HIGHLIGHTS Column */}
+                <div className="bg-neutral-50/80 border border-neutral-200/60 rounded-xl p-3 space-y-1">
+                  <span className="text-neutral-400 font-mono font-bold uppercase tracking-widest block text-[9.5px]">
+                    KEY METRICS
+                  </span>
+                  <div className="space-y-0.5 text-neutral-800 font-medium text-[10.5px]">
+                    {activeProject.awardsText.map((award, i) => (
+                      <div key={i} className="flex items-center gap-1.5">
+                        <span className="text-emerald-600 font-bold">✦</span>
+                        <span className="truncate">{award}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* DEV / CREATOR Column */}
+                <div className="bg-neutral-50/80 border border-neutral-200/60 rounded-xl p-3 space-y-1">
+                  <span className="text-neutral-400 font-mono font-bold uppercase tracking-widest block text-[9.5px]">
+                    LEAD ENGINEER
+                  </span>
+                  <div className="text-neutral-950 font-bold font-mono text-[11px]">
+                    ARNAY TIWARI
+                  </div>
+                  <a
+                    href="https://miidaystudio.online/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-neutral-500 hover:text-black font-mono text-[10px] mt-0.5 transition-colors"
+                  >
+                    <span>Founder @ MiidayStudio</span>
+                    <ExternalLink size={10} />
+                  </a>
+                </div>
+
+              </div>
+
+              {/* 4. Tech Stack Tags */}
+              <div>
+                <span className="text-neutral-400 font-mono font-bold uppercase tracking-widest block text-[9.5px] mb-1.5">
+                  TECHNOLOGY & ARCHITECTURE
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {activeProject.tech.map((t) => (
+                    <span
+                      key={t}
+                      className="px-2.5 py-0.5 rounded-full bg-white text-neutral-800 font-mono text-[10px] font-semibold uppercase tracking-wider border border-neutral-200/80 shadow-2xs"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* 5. Action Buttons (VISIT & FULL CASE STUDY) */}
+              <div className="pt-2 flex flex-wrap items-center gap-2 sm:gap-2.5 border-t border-neutral-100">
+                {activeProject.liveUrl && (
+                  <a
+                    href={activeProject.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/btn inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-neutral-950 hover:bg-neutral-800 text-white font-mono font-bold text-[11px] uppercase tracking-wider transition-all duration-300 shadow-md cursor-pointer"
+                  >
+                    <span>VISIT {activeProject.displayUrl || 'PROJECT'}</span>
+                    <ArrowUpRight
+                      size={13}
+                      className="transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5"
+                    />
+                  </a>
+                )}
+
+                {activeProject.githubUrl && (
+                  <a
+                    href={activeProject.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 sm:p-2.5 rounded-full bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-800 transition-colors"
+                    aria-label="GitHub Repository"
+                  >
+                    <Github size={14} />
+                  </a>
+                )}
+
+                <button
+                  onClick={() => setSelectedProject(activeProject)}
+                  className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-white hover:bg-neutral-100 border border-neutral-300 text-neutral-900 font-mono text-[11px] font-semibold uppercase tracking-wider transition-colors cursor-pointer shadow-2xs"
+                >
+                  <span>Full Case Study</span>
+                  <ExternalLink size={12} />
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Bottom Section Bar */}
+        <div className="mt-20 sm:mt-28 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-neutral-200 text-xs font-mono text-neutral-500">
+          <div className="flex items-center gap-3">
+            <span className="text-neutral-900 font-bold">ARNAY TIWARI</span>
+            <span>•</span>
+            <span>PORTFOLIO CASE STUDIES © 2026</span>
+          </div>
+
+          <button
+            onClick={() => setIsAllProjectsOpen(true)}
+            className="group inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-neutral-300 bg-white hover:bg-neutral-950 hover:border-neutral-950 hover:text-white text-neutral-800 font-semibold text-xs tracking-wider transition-all duration-300 cursor-pointer shadow-xs"
+          >
+            <span>VIEW ALL CASES ARCHIVE</span>
+            <ArrowUpRight
+              size={13}
+              className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             />
-          ))}
+          </button>
         </div>
+
       </div>
 
-      {/* View More Button */}
-      <div
-        ref={buttonRef}
-        className="mt-16 sm:mt-20 flex justify-center z-20 relative opacity-0"
-      >
-        <button
-          onClick={() => setIsAllProjectsOpen(true)}
-          className="group/all-btn inline-flex items-center justify-center gap-3 rounded-full border border-[#a3e635]/30 bg-[#a3e635]/5 px-8 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-widest text-[#a3e635] hover:bg-[#a3e635] hover:border-[#a3e635] hover:text-black transition-all duration-300 shadow-[0_0_15px_rgba(163,230,53,0.15)] hover:shadow-[0_0_25px_rgba(163,230,53,0.35)] btn-shine"
-        >
-          <span>View More</span>
-          <ArrowUpRight size={14} className="transition-transform duration-300 group-hover/all-btn:translate-x-0.5 group-hover/all-btn:-translate-y-0.5" />
-        </button>
-      </div>
-
+      {/* Project Details Modal Overlay */}
       <ProjectDetailsOverlay
         project={selectedProject}
         onClose={() => setSelectedProject(null)}
-        totalProjects={ALL_PROJECTS.length}
+        totalProjects={EDITORIAL_PROJECTS.length}
       />
 
+      {/* All Projects Archive Modal Overlay */}
       <AllProjectsOverlay
         open={isAllProjectsOpen}
         onClose={() => setIsAllProjectsOpen(false)}
